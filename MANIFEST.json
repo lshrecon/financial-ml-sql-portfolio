@@ -1,0 +1,178 @@
+{
+  "date": "2026-10-09",
+  "kind": "review-source-excerpts",
+  "project": "financial-ml",
+  "source_files": [
+    {
+      "path": "ml_validation.py",
+      "source": "financial-ml/ml_validation.py",
+      "source_sha256": "0cf622fe522d6a385de56f36a3ce3b3b863b54652f6e16697e20d24e59420429",
+      "sha256": "0cf622fe522d6a385de56f36a3ce3b3b863b54652f6e16697e20d24e59420429",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "KSE_가치팩터_functions.py",
+      "source": "financial-ml/KSE_가치팩터_functions.py",
+      "source_sha256": "84ed9e729ed43a4c51d06f67637c9a91aa1ebc51c528f07494e1d0be26274acf",
+      "sha256": "84ed9e729ed43a4c51d06f67637c9a91aa1ebc51c528f07494e1d0be26274acf",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "evaluate_price_direction.py",
+      "source": "financial-ml/evaluate_price_direction.py",
+      "source_sha256": "d76ca52558869017d4841edb7081b20cc8f6e2f6acaee2707843f4cfa0484995",
+      "sha256": "d76ca52558869017d4841edb7081b20cc8f6e2f6acaee2707843f4cfa0484995",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "evaluate_saved_cohort.py",
+      "source": "financial-ml/evaluate_saved_cohort.py",
+      "source_sha256": "5373f1963ce47ac807fc60a6d672346a7697c0878db5e38da52b0c78f56e8bf0",
+      "sha256": "5373f1963ce47ac807fc60a6d672346a7697c0878db5e38da52b0c78f56e8bf0",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "머신러닝_전처리.ipynb",
+      "source": "financial-ml/머신러닝_전처리.ipynb",
+      "source_sha256": "adda229a40f0101ebf495f0c9fa4072532be3479d24b39753f9c4a0ce0181f38",
+      "sha256": "2491145248cc5e2f0bd6ae4cfb561b2a9ea6d051be85f7d96bc22403bcf5e8b9",
+      "transformation": "notebook output, execution count, attachments, metadata removed; cell source unchanged"
+    },
+    {
+      "path": "의사결정트리.ipynb",
+      "source": "financial-ml/의사결정트리.ipynb",
+      "source_sha256": "e31520e34fb2ad6628aebaf6e496daadf62b345f6e16447c7c4f4a4428d598d9",
+      "sha256": "25080542580f152103a51cd2300519025e02898107eb15d661405353d01a9261",
+      "transformation": "notebook output, execution count, attachments, metadata removed; cell source unchanged"
+    },
+    {
+      "path": "랜덤포레스트.ipynb",
+      "source": "financial-ml/랜덤포레스트.ipynb",
+      "source_sha256": "1bec6ed7503c54a510cc10a0bf31bb4ab93965c25b17653050cdb748ecbb4c6f",
+      "sha256": "a9d3c6da02941528f252422a5fdc8e9ad189f1239e27df09efa7bd8863feea5e",
+      "transformation": "notebook output, execution count, attachments, metadata removed; cell source unchanged"
+    },
+    {
+      "path": "verification/price-direction-v2/protocol.json",
+      "source": "financial-ml/verification/price-direction-v2/protocol.json",
+      "source_sha256": "2bd8526a8349415d4d4e9570f77bd00fb4d92fd7fe27d382e0f67ac116bdefe4",
+      "sha256": "2bd8526a8349415d4d4e9570f77bd00fb4d92fd7fe27d382e0f67ac116bdefe4",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_accounting_regressions.py",
+      "source": "financial-ml/tests/test_accounting_regressions.py",
+      "source_sha256": "78069b126f10fdb5160cb0f10631b60925ba487d85be33e13d78ec952b89c0f0",
+      "sha256": "78069b126f10fdb5160cb0f10631b60925ba487d85be33e13d78ec952b89c0f0",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_date_and_cohort_boundaries.py",
+      "source": "financial-ml/tests/test_date_and_cohort_boundaries.py",
+      "source_sha256": "e7c1a3c6dea660a04e22949a8a623fe6f85f0169036c534bc3e37db3b36ba049",
+      "sha256": "e7c1a3c6dea660a04e22949a8a623fe6f85f0169036c534bc3e37db3b36ba049",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_feature_alignment.py",
+      "source": "financial-ml/tests/test_feature_alignment.py",
+      "source_sha256": "3cd241f84be6e1662193857e13fa2549a762776b289f085b8ecf3413d9cf4f0f",
+      "sha256": "3cd241f84be6e1662193857e13fa2549a762776b289f085b8ecf3413d9cf4f0f",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_independent_review.py",
+      "source": "financial-ml/tests/test_independent_review.py",
+      "source_sha256": "1bb6f059d260af878524c6e762d61821bb0cc02041ea6e3c848d5b386ff921ce",
+      "sha256": "1bb6f059d260af878524c6e762d61821bb0cc02041ea6e3c848d5b386ff921ce",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_price_target.py",
+      "source": "financial-ml/tests/test_price_target.py",
+      "source_sha256": "b98e46ab4af999ee134aba68d2d09516d5ed6dbf065e0c5da1c27aade5e1a57d",
+      "sha256": "b98e46ab4af999ee134aba68d2d09516d5ed6dbf065e0c5da1c27aade5e1a57d",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_saved_cohort.py",
+      "source": "financial-ml/tests/test_saved_cohort.py",
+      "source_sha256": "b218e9df332da7a20d19d0a031f9e97813488a82badf91f1859e4f0c9955a5d7",
+      "sha256": "b218e9df332da7a20d19d0a031f9e97813488a82badf91f1859e4f0c9955a5d7",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "tests/test_validation.py",
+      "source": "financial-ml/tests/test_validation.py",
+      "source_sha256": "9fd32d053b29cb1715c3c05d580b12ec4b9ec28750a96a68317c91f757a93811",
+      "sha256": "9fd32d053b29cb1715c3c05d580b12ec4b9ec28750a96a68317c91f757a93811",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/stock_etl.py",
+      "source": "financial-ml/database/stock_etl.py",
+      "source_sha256": "26f5a0a17d299dc6e55b0eef5910dea5457ef4cf662ac7dac4bd815905503dee",
+      "sha256": "26f5a0a17d299dc6e55b0eef5910dea5457ef4cf662ac7dac4bd815905503dee",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/test_stock_etl.py",
+      "source": "financial-ml/database/test_stock_etl.py",
+      "source_sha256": "b5ec9d3510aa8073c791a23aebc4ceae873d8b997a61e750abad4b79e325e6ea",
+      "sha256": "b5ec9d3510aa8073c791a23aebc4ceae873d8b997a61e750abad4b79e325e6ea",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/주식데이터베이스sql.sql",
+      "source": "financial-ml/database/주식데이터베이스sql.sql",
+      "source_sha256": "8cb4c1bd545648402243ff9f6140bfbaa9280c0019d7089af8786e3404de2024",
+      "sha256": "8cb4c1bd545648402243ff9f6140bfbaa9280c0019d7089af8786e3404de2024",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/migration_existing_stock_data.sql",
+      "source": "financial-ml/database/migration_existing_stock_data.sql",
+      "source_sha256": "98b2b962dca3cbb4caee0cede740be821772f1f4a0c9aaffafb637aa9522b95a",
+      "sha256": "98b2b962dca3cbb4caee0cede740be821772f1f4a0c9aaffafb637aa9522b95a",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/sample_stock_data.csv",
+      "source": "financial-ml/database/sample_stock_data.csv",
+      "source_sha256": "67c30594545bdd881565a86adbd6320f0a57d9ad72e87f1c1224ec2c7885f7e7",
+      "sha256": "67c30594545bdd881565a86adbd6320f0a57d9ad72e87f1c1224ec2c7885f7e7",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/mysql_integration_checks.py",
+      "source": "financial-ml/database/mysql_integration_checks.py",
+      "source_sha256": "68b5d065918b9717820adbf8e026a5da96990ab133adba8d6774293c7e9a8ae2",
+      "sha256": "68b5d065918b9717820adbf8e026a5da96990ab133adba8d6774293c7e9a8ae2",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/run_isolated_mysql.py",
+      "source": "financial-ml/database/run_isolated_mysql.py",
+      "source_sha256": "d106bdd40938780f8c0754a95db2331ed9d15b716ed513bf298db0d6ae5f6b25",
+      "sha256": "d106bdd40938780f8c0754a95db2331ed9d15b716ed513bf298db0d6ae5f6b25",
+      "transformation": "unchanged"
+    },
+    {
+      "path": "database/주식데이터베이스전처리.ipynb",
+      "source": "financial-ml/database/주식데이터베이스전처리.ipynb",
+      "source_sha256": "e7115c0ebb6d51ab92b6bdc6014ca0c2dd491d12e65322d3690af6a87133d17b",
+      "sha256": "10d522486d89cc56ad0adc19c902619e356f435cfa4bec53fe678f0c0747cf31",
+      "transformation": "notebook output, execution count, attachments, metadata removed; cell source unchanged"
+    },
+    {
+      "path": "database/주식_데이터베이스_서버_연결.ipynb",
+      "source": "financial-ml/database/주식_데이터베이스_서버_연결.ipynb",
+      "source_sha256": "38fd8cf19bee5b0f3ff31b5bc7de7305205ff53a09892cfb6cb1920dab671437",
+      "sha256": "3748e029dfe50e2de9178d35c662a806a897a62e8405865d8763a0164d254b2a",
+      "transformation": "notebook output, execution count, attachments, metadata removed; cell source unchanged"
+    }
+  ],
+  "readme_sha256": "b81971aa4976b504d0cbdcbc77287b78a2760190fe7610ff155b3836d97862d6",
+  "excluded": "original data, real recordings, credentials, binaries, environments, private verification logs",
+  "scope": "Existing verification is described in README. This manifest identifies distributed files; it is not an execution success claim."
+}

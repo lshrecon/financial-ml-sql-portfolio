@@ -1,0 +1,82 @@
+{
+  "purpose": "Target-corrected historical diagnostic, prompted by 25 zero-share rows; not independent test or investment backtest",
+  "source_sha256": "5bd9e4a724ddc2b4e7fce8e61831b6d6bcb5b3332ee9454f84abd75ed17b089a",
+  "features": [
+    "1/PER",
+    "1/PBR",
+    "1/PSR",
+    "1/PCR",
+    "ALL",
+    "ALL Rank",
+    "1/PER Rank",
+    "1/PBR Rank",
+    "1/PSR Rank",
+    "1/PCR Rank"
+  ],
+  "target": "source adjusted exit price strictly greater than source adjusted entry price; independent of cash and share quantity",
+  "train_end": 2016,
+  "validation_end": 2020,
+  "cv_folds": 3,
+  "seed": 42,
+  "selection_metric": "positive_price_direction_f1",
+  "tie_break": "first candidate in declared order",
+  "refit_with_validation": false,
+  "missing_exit_policy": "quarantine only the 3 source-traced missing exit rows; never impute or label as zero",
+  "expected_missing": [
+    [
+      2002,
+      "알루코"
+    ],
+    [
+      2002,
+      "하이트진로"
+    ],
+    [
+      2005,
+      "지누스"
+    ]
+  ],
+  "candidates": [
+    "dummy_majority",
+    "dummy_all_positive",
+    "decision_tree_cv",
+    "random_forest_cv"
+  ],
+  "decision_tree_grid": {
+    "max_depth": [
+      4,
+      8
+    ],
+    "min_samples_leaf": [
+      20,
+      40
+    ]
+  },
+  "random_forest_grid": {
+    "n_estimators": [
+      100
+    ],
+    "max_depth": [
+      6,
+      12
+    ],
+    "min_samples_leaf": [
+      10,
+      30
+    ],
+    "max_features": [
+      "sqrt"
+    ]
+  },
+  "constraints": [
+    "No tuning after historical test results",
+    "No feature imputation; unexpected nonfinite features stop execution",
+    "No random cross-validation",
+    "No costs, dividends or portfolio simulation",
+    "Publication-date and historical-universe availability remain unverified",
+    "Same candidate grid, seed and F1 selection as v1; only target-definition correction. Existing historical test is already known."
+  ],
+  "target_column": "가격상승여부",
+  "revision_reason": "25 zero-share rows have zero account profit; 8 still have rising adjusted prices. User intent is stock growth, separate from account P&L.",
+  "previous_results_seen": true
+}
