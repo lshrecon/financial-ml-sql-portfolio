@@ -168,6 +168,14 @@ def plot_total_values(values, title):
     plt.grid(True)
     plt.show()
 
+
+def _check_purchase_prices(prices):
+    prices = pd.to_numeric(prices, errors='coerce')
+    if not np.isfinite(prices).all() or (prices <= 0).any():
+        raise ValueError('Purchase prices must be finite and positive')
+    return prices
+
+
 def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month, Rank_df, close_df):
     """Use first/last observed date WITHIN each requested month, never nearest outside it.
 
@@ -188,10 +196,9 @@ def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month
         raise ValueError('Sale date cannot precede purchase date')
     if not set(symbols).issubset(close_1.columns):
         raise ValueError('Selected companies are missing from price data')
-    purchase_prices = pd.to_numeric(close_1.loc[purchase_date, symbols], errors='coerce')
+    purchase_prices = _check_purchase_prices(close_1.loc[purchase_date, symbols])
     sale_prices = pd.to_numeric(close_1.loc[sale_date, symbols], errors='coerce')
-    if (not np.isfinite(purchase_prices).all() or not np.isfinite(sale_prices).all()
-            or (purchase_prices <= 0).any() or (sale_prices < 0).any()):
+    if not np.isfinite(sale_prices).all() or (sale_prices < 0).any():
         raise ValueError('Endpoint prices must be finite; purchase > 0 and sale >= 0')
     return pd.DataFrame({
         '기업명': symbols,
@@ -221,9 +228,7 @@ def Purchase_share(Purchase, Rank, investment):
         raise ValueError('Missing prices for selected companies')
     if filtered.empty:
         return pd.DataFrame(columns=columns)
-    prices = pd.to_numeric(filtered['매수가'], errors='coerce')
-    if not np.isfinite(prices).all() or (prices <= 0).any():
-        raise ValueError('Purchase prices must be finite and positive')
+    prices = _check_purchase_prices(filtered['매수가'])
     allocation = investment / len(filtered)
     return pd.DataFrame({'기업명': filtered['기업명'].to_numpy(),
                          '구매주식수': np.floor(allocation / prices).astype(int).to_numpy(),
