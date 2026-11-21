@@ -2,7 +2,7 @@
 
 기존 검사 결과를 포함한 일본어 원본 ZIP의 README를 본인 열람용으로 옮긴 문서로, 아래 ‘ZIP’·‘배포 자료’는 일본어 원본 코드 묶음을 뜻합니다.
 
-2026년 10월 9일판(11월에 `value_factor_backtest.py`와 전처리 노트북 리팩토링 추가). 수정·학습용 사본에서 정리한 채용 검토용 소스입니다. 수업에서 제공받은 원자료는 포함하지 않았습니다. 모든 노트북을 한 번에 실행할 수 있는 완성된 패키지는 아닙니다.
+2026년 10월 9일판(11월에 `value_factor_backtest.py`·전처리 노트북 리팩토링과 저장소 전체 형식 정리 추가). 수정·학습용 사본에서 정리한 채용 검토용 소스입니다. 수업에서 제공받은 원자료는 포함하지 않았습니다. 모든 노트북을 한 번에 실행할 수 있는 완성된 패키지는 아닙니다.
 
 ## 목적·구성
 
@@ -21,17 +21,18 @@
 
 | 항목 | 전 | 후 |
 |---|---|---|
-| 파일 | `KSE_가치팩터_functions.py` 273줄 | `value_factor_backtest.py` 376줄(노트북에서 옮긴 함수 1개 포함) |
+| 파일 | `KSE_가치팩터_functions.py` 273줄 | `value_factor_backtest.py` 491줄(노트북에서 옮긴 함수 2개 포함) |
 | 79자 넘는 줄 | 51 | 0 |
 | 주석 | 10줄(필요 없는 주석 5줄 포함) | 6줄(이유를 설명하는 주석 3개) |
 | 대문자가 들어간 함수·매개변수 이름 | 6 | 0(옛 함수 이름 3개는 별칭으로 남김) |
 | 반복된 코드 | 날짜표 만들기, 월 첫·마지막 거래일 고르기, 매수가 검사가 각각 2곳 | 클래스 1개와 함수 1개로 모음 |
 | 같은 표를 부르는 이름 | 가격표 3개, 선택된 회사 표 4개 | 각각 1개 |
-| 노트북 `머신러닝_전처리.ipynb` | 코드 946줄. 지표 붙이기 5개, 매매 반복문 10개, 지표 계산 4개가 반복됨 | 코드 357줄. 함수 3개(`merge_values`, `calculate_combined_profit`, `calculate_price_ratios`)로 모음 |
+| 노트북 `머신러닝_전처리.ipynb` | 코드 946줄. 지표 붙이기 5개, 매매 반복문 10개, 지표 계산 4개, 순위표 5개, 역수 4개가 반복됨. 주석 41줄 | 코드 301줄. 함수 5개(`merge_values`, `calculate_combined_profit`, `calculate_price_ratios`, `calculate_price_ratio_rank`, `calculate_inverse_price_ratios`)로 모음. 안내 주석 1줄 |
+| 모듈 6개(`ml_validation.py` 등) | 79자 넘는 줄 244개 | 0 |
 
-줄 수가 늘어난 것은 PEP 8에 맞춰 한 줄을 79자 이하로 나눴기 때문입니다.
+줄 수가 늘어난 것은 PEP 8에 맞춰 한 줄을 79자 이하로 나눴기 때문입니다. 줄 정리는 포매터 `ruff format`(설정: `pyproject.toml`, 79자·작은따옴표)으로 했고, 저장소의 파이썬 파일과 노트북 전체에 적용했습니다.
 
-- 동작 확인: 테스트 33개(import 줄 변경, 그리고 노트북 셀을 읽던 PBR 테스트 1개를 함수 호출로 변경. 기대값은 같음)와 database 테스트 17개가 통과했습니다. 첫 커밋은 원본과 주요 입력으로, 그 뒤 커밋은 직전 커밋과 무작위 입력으로 결과를 비교했습니다. 노트북은 원자료로 끝까지 실행하지 않았고, 지어낸 데이터로 원래 코드와 비교했습니다.
+- 동작 확인: 테스트 33개와 database 테스트 17개가 통과했습니다(Python 3.13.5, pandas 2.3.1). 테스트에서 바뀐 것은 import 줄, 노트북 셀을 읽던 PBR 테스트 1개의 호출 방식(기대값은 같음), 포매터에 따른 줄바꿈, database 테스트 이름 1개입니다. 포매터를 적용한 커밋은 파일마다 코드 구조(AST)가 같은지 확인했습니다. 첫 커밋은 원본과 주요 입력으로, 그 뒤 커밋은 직전 커밋과 무작위 입력으로 결과를 비교했습니다. 노트북은 원자료로 끝까지 실행하지 않았고, 지어낸 데이터로 원래 코드와 비교했습니다.
 - 의도한 동작 변화: 날짜 열을 위치가 아니라 이름('Symbol Name' 또는 'Date')으로 찾습니다. 13월·0월 같은 잘못된 월은 다른 해로 넘기지 않고 에러를 냅니다. 매수가와 매도가의 에러 메시지를 나눴습니다.
 - 원본 코드: [c0df58a의 `KSE_가치팩터_functions.py`](https://github.com/lshrecon/financial-ml-sql-portfolio/blob/c0df58a/KSE_%EA%B0%80%EC%B9%98%ED%8C%A9%ED%84%B0_functions.py). 전체 변경: [c0df58a...main 비교](https://github.com/lshrecon/financial-ml-sql-portfolio/compare/c0df58a...main).
 
@@ -60,7 +61,7 @@
 
 ## 작은 검사 실행 방법
 
-확인한 ML 환경은 Python 3.12.7, NumPy 1.26.4, pandas 2.2.2, scikit-learn 1.7.0입니다. 검사에는 matplotlib, Excel을 읽으려면 openpyxl도 필요합니다. 새 환경에서의 설치는 검증하지 않았습니다.
+확인한 ML 환경은 Python 3.12.7, NumPy 1.26.4, pandas 2.2.2, scikit-learn 1.7.0입니다. 검사에는 matplotlib, Excel을 읽으려면 openpyxl도 필요합니다. 형식 검사(`ruff format --check .`)에는 ruff 0.17.6이 필요합니다. 새 환경에서의 설치는 검증하지 않았습니다.
 
 ```text
 python -m unittest discover -s tests -v
