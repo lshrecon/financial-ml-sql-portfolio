@@ -24,6 +24,14 @@ class AdjustedClosesByCompany:
             raise ValueError('Price dates must be valid and unique')
         self._date_sorted_closes = close_1.sort_index()
 
+    def search_first_date(self, year, month):
+        return next((date for date in self._date_sorted_closes.index
+                     if (date.year, date.month) == (year, month)), None)
+
+    def search_last_date(self, year, month):
+        return next((date for date in reversed(self._date_sorted_closes.index)
+                     if (date.year, date.month) == (year, month)), None)
+
 
 def calculate_q1_endpoint_mean(df, year, company_columns):
     """Mean of January's first and March's last observed prices, not Q1 daily mean.
@@ -36,13 +44,14 @@ def calculate_q1_endpoint_mean(df, year, company_columns):
         raise ValueError('Duplicate company columns')
     if not set(company_columns).issubset(df.columns):
         raise ValueError('Missing company columns')
-    prices = (AdjustedClosesByCompany(df)._date_sorted_closes
+    closes = AdjustedClosesByCompany(df)
+    prices = (closes._date_sorted_closes
               .loc[:, company_columns].apply(pd.to_numeric, errors='raise'))
-    january = prices.loc[(prices.index.year == year) & (prices.index.month == 1)]
-    march = prices.loc[(prices.index.year == year) & (prices.index.month == 3)]
-    if january.empty or march.empty:
+    first_date_q1 = closes.search_first_date(year, 1)
+    last_date_q1 = closes.search_last_date(year, 3)
+    if first_date_q1 is None or last_date_q1 is None:
         return {name: np.nan for name in company_columns}
-    ends = pd.concat([january.iloc[[0]], march.iloc[[-1]]])
+    ends = prices.loc[[first_date_q1, last_date_q1]]
     if np.isinf(ends.to_numpy()).any() or (ends <= 0).any().any():
         raise ValueError('Observed endpoint prices must be finite and positive')
     # skipna=False: one observed endpoint is not a substitute for both endpoints.
@@ -169,15 +178,12 @@ def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month
     symbols = Rank_df['Company'].drop_duplicates().tolist()
     if not symbols:
         return pd.DataFrame(columns=columns)
-    close_1 = AdjustedClosesByCompany(close_df)._date_sorted_closes
-    purchase_period = pd.Period(year=purchase_year, month=purchase_month, freq='M')
-    sale_period = pd.Period(year=sale_year, month=sale_month, freq='M')
-    periods = close_1.index.to_period('M')
-    purchase_dates = close_1.index[periods == purchase_period]
-    sale_dates = close_1.index[periods == sale_period]
-    if purchase_dates.empty or sale_dates.empty:
+    closes = AdjustedClosesByCompany(close_df)
+    close_1 = closes._date_sorted_closes
+    purchase_date = closes.search_first_date(purchase_year, purchase_month)
+    sale_date = closes.search_last_date(sale_year, sale_month)
+    if purchase_date is None or sale_date is None:
         raise ValueError('No observed price dates in the requested purchase or sale month')
-    purchase_date, sale_date = purchase_dates.min(), sale_dates.max()
     if sale_date < purchase_date:
         raise ValueError('Sale date cannot precede purchase date')
     if not set(symbols).issubset(close_1.columns):
