@@ -78,7 +78,7 @@ def _feature_table(frame):
     return result
 
 
-def top_companies_by_inverse_Rank(df, year, top_n):
+def top_companies_by_inverse_rank(df, year, top_n):
     """Rank observed inverse-factor SCORES descending. Historical name is retained.
 
     Rank in this function's result is the score, until the notebook assigns
@@ -95,6 +95,9 @@ def top_companies_by_inverse_Rank(df, year, top_n):
     result = scores.rename_axis('Company').reset_index(name='Rank')
     # Stable tie handling makes source-column order irrelevant.
     return result.sort_values(['Rank', 'Company'], ascending=[False, True], kind='stable').head(top_n).reset_index(drop=True)
+
+
+top_companies_by_inverse_Rank = top_companies_by_inverse_rank
 
 
 def calculate_weighted_average(dfs):
@@ -176,14 +179,14 @@ def _check_purchase_prices(prices):
     return prices
 
 
-def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month, Rank_df, adjusted_closes):
+def price_for_purchase_sale(purchase_year, purchase_month, sale_year, sale_month, ranked_companies_for_year, adjusted_closes):
     """Use first/last observed date WITHIN each requested month, never nearest outside it.
 
     This is a month-boundary rule, not a complete exchange calendar or execution model.
     Missing endpoint prices are rejected rather than silently shifted to another date.
     """
     columns = ['기업명', '매수일', '매수가', '매도일', '매도가']
-    symbols = Rank_df['Company'].drop_duplicates().tolist()
+    symbols = ranked_companies_for_year['Company'].drop_duplicates().tolist()
     if not symbols:
         return pd.DataFrame(columns=columns)
     closes = AdjustedClosesByCompany(adjusted_closes)
@@ -208,20 +211,25 @@ def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month
         '매도가': sale_prices.values
     })
 
-def Purchase_share(Purchase, Rank, investment):
+
+Price_for_Purchase_Sale = price_for_purchase_sale
+
+
+def purchase_share(purchase, ranked_companies_for_year, investment):
     """Allocate equally across the already-selected companies, without re-ranking."""
     columns = ['기업명', '구매주식수', '투자원금']
     if not np.isfinite(investment) or investment < 0:
         raise ValueError('Investment must be finite and nonnegative')
-    if Purchase.empty or investment == 0:
+    if purchase.empty or investment == 0:
         return pd.DataFrame(columns=columns)
-    purchase_years = pd.to_datetime(Purchase['매수일'], errors='coerce').dt.year
+    purchase_years = pd.to_datetime(purchase['매수일'], errors='coerce').dt.year
     if purchase_years.isna().any() or purchase_years.nunique() != 1:
         raise ValueError('Purchases must belong to one valid year')
-    # Rank is the caller's already-selected cohort. Its label/feature year can
-    # precede the purchase year; filtering it again would silently lose capital.
-    selected = Rank['Company'].drop_duplicates()
-    filtered = Purchase[Purchase['기업명'].isin(selected)].copy()
+    # ranked_companies_for_year is the caller's already-selected
+    # cohort. Its label/feature year can precede the purchase year;
+    # filtering it again would silently lose capital.
+    selected = ranked_companies_for_year['Company'].drop_duplicates()
+    filtered = purchase[purchase['기업명'].isin(selected)].copy()
     if filtered['기업명'].duplicated().any():
         raise ValueError('Duplicate purchase company')
     if set(selected) != set(filtered['기업명']):
@@ -235,28 +243,30 @@ def Purchase_share(Purchase, Rank, investment):
                          '투자원금': allocation})
 
 
+Purchase_share = purchase_share
 
-def process_year_data(year, data, previous_total_value, base_purchase_year, base_purchase_month, base_sale_year, base_sale_month, adjusted_closes, base_year=None):
+
+def process_year_data(year, ranked_companies_for_year, previous_total_value, base_purchase_year, base_purchase_month, base_sale_year, base_sale_month, adjusted_closes, base_year=None):
     if not np.isfinite(previous_total_value) or previous_total_value < 0:
         raise ValueError('Portfolio value must be finite and nonnegative')
-    if data.empty or previous_total_value == 0:
+    if ranked_companies_for_year.empty or previous_total_value == 0:
         return previous_total_value, pd.DataFrame(columns=['기업명', '매수일', '매도가', '매수가', '매도일', '구매주식수', '투자원금', '잔금', '매출', '수익', '수익률', '수익률_양음'])
     # Explicit period anchor replaces the undeclared global start_year.
     anchor = base_purchase_year if base_year is None else base_year
-    Purchase_current = Price_for_Purchase_Sale(base_purchase_year + (year - anchor), base_purchase_month,
+    purchase_current = price_for_purchase_sale(base_purchase_year + (year - anchor), base_purchase_month,
                                                base_sale_year + (year - anchor), base_sale_month,
-                                               data, adjusted_closes)
+                                               ranked_companies_for_year, adjusted_closes)
 
-    share_current = Purchase_share(Purchase_current, data, previous_total_value)
+    share_current = purchase_share(purchase_current, ranked_companies_for_year, previous_total_value)
 
-    Purchase_current_first = Purchase_current.drop_duplicates(subset=['기업명', '매수일'], keep='first')
-    Purchase_current_share = pd.merge(share_current, Purchase_current_first, on='기업명', how='left')
+    purchase_current_first = purchase_current.drop_duplicates(subset=['기업명', '매수일'], keep='first')
+    purchase_current_share = pd.merge(share_current, purchase_current_first, on='기업명', how='left')
 
-    Purchase_current_share = recalculate_returns(Purchase_current_share)
+    purchase_current_share = recalculate_returns(purchase_current_share)
 
-    total_value_current = Purchase_current_share['매출'].sum()
+    total_value_current = purchase_current_share['매출'].sum()
 
-    return total_value_current, Purchase_current_share
+    return total_value_current, purchase_current_share
 
 
 
@@ -272,8 +282,8 @@ def process_financial_indicator(year_range, data_set, initial_investment, purcha
     profits = {}
     previous_total_value = initial_investment
     for year in year_range:
-        current_data = data_set[data_set['Year'] == year]
-        total_value_current, profit_df = process_year_data(year, current_data, previous_total_value, *purchase_params, *sale_params, adjusted_closes, base_year=year_range[0])
+        ranked_companies_for_year = data_set[data_set['Year'] == year]
+        total_value_current, profit_df = process_year_data(year, ranked_companies_for_year, previous_total_value, *purchase_params, *sale_params, adjusted_closes, base_year=year_range[0])
         
         total_values[year] = total_value_current
         profits[year] = profit_df
