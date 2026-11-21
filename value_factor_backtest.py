@@ -72,6 +72,33 @@ def calculate_q1_average_for_all_companies(df, year, company_columns):
     return calculate_q1_endpoint_mean(df, year, company_columns)
 
 
+def calculate_price_ratios(per_share_values, column, average_prices,
+                           company_columns):
+    values_by_year = per_share_values.pivot(index='Year', columns='Name',
+                                            values=column)
+    ratios = pd.DataFrame()
+    for year in range(per_share_values['Year'].min() + 1,
+                      average_prices['Year'].max() + 1):
+        if (year in average_prices['Year'].values
+                and (year - 1) in values_by_year.index):
+            previous_year_values = values_by_year.loc[year - 1]
+            current_year_prices = average_prices[
+                average_prices['Year'] == year].iloc[0]
+            row = {'Year': year}
+            for company in company_columns:
+                value = previous_year_values.get(company)
+                price = current_year_prices.get(company)
+                if value and price and value != 0:
+                    ratio = price / value
+                else:
+                    ratio = None
+                row[company] = ratio
+            ratios = pd.concat([ratios, pd.DataFrame([row])],
+                               ignore_index=True)
+    ratios['Year'] = ratios['Year'].astype(int)
+    return ratios
+
+
 def _feature_table(frame):
     if 'Year' not in frame or frame.columns.duplicated().any():
         raise ValueError('Features need one Year column and unique '
