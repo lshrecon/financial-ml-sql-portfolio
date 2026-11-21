@@ -99,6 +99,13 @@ def calculate_price_ratios(per_share_values, column, average_prices,
     return ratios
 
 
+def calculate_inverse_price_ratios(price_ratios, company_columns):
+    inverse_ratios = price_ratios.copy()
+    for company in company_columns:
+        inverse_ratios[company] = 1 / inverse_ratios[company]
+    return inverse_ratios
+
+
 def _feature_table(frame):
     if 'Year' not in frame or frame.columns.duplicated().any():
         raise ValueError('Features need one Year column and unique '
