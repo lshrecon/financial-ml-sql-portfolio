@@ -12,17 +12,17 @@ class AdjustedClosesByCompany:
     DATE_COLUMNS = ('Symbol Name', 'Date')
 
     def __init__(self, adjusted_closes):
-        close_1 = adjusted_closes.copy()
-        if not isinstance(close_1.index, pd.DatetimeIndex):
+        date_indexed_closes = adjusted_closes.copy()
+        if not isinstance(date_indexed_closes.index, pd.DatetimeIndex):
             date_column = next((name for name in self.DATE_COLUMNS
-                                if name in close_1.columns), None)
+                                if name in date_indexed_closes.columns), None)
             if date_column is None:
                 raise ValueError(f'Missing date column: {self.DATE_COLUMNS}')
-            close_1 = close_1.set_index(date_column)
-            close_1.index = pd.to_datetime(close_1.index, errors='coerce')
-        if close_1.index.isna().any() or close_1.index.has_duplicates:
+            date_indexed_closes = date_indexed_closes.set_index(date_column)
+            date_indexed_closes.index = pd.to_datetime(date_indexed_closes.index, errors='coerce')
+        if date_indexed_closes.index.isna().any() or date_indexed_closes.index.has_duplicates:
             raise ValueError('Price dates must be valid and unique')
-        self._date_sorted_closes = close_1.sort_index()
+        self._date_sorted_closes = date_indexed_closes.sort_index()
 
     def search_first_date(self, year, month):
         return next((date for date in self._date_sorted_closes.index
@@ -176,7 +176,7 @@ def _check_purchase_prices(prices):
     return prices
 
 
-def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month, Rank_df, close_df):
+def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month, Rank_df, adjusted_closes):
     """Use first/last observed date WITHIN each requested month, never nearest outside it.
 
     This is a month-boundary rule, not a complete exchange calendar or execution model.
@@ -186,18 +186,18 @@ def Price_for_Purchase_Sale(purchase_year, purchase_month, sale_year, sale_month
     symbols = Rank_df['Company'].drop_duplicates().tolist()
     if not symbols:
         return pd.DataFrame(columns=columns)
-    closes = AdjustedClosesByCompany(close_df)
-    close_1 = closes._date_sorted_closes
+    closes = AdjustedClosesByCompany(adjusted_closes)
+    date_sorted_closes = closes._date_sorted_closes
     purchase_date = closes.search_first_date(purchase_year, purchase_month)
     sale_date = closes.search_last_date(sale_year, sale_month)
     if purchase_date is None or sale_date is None:
         raise ValueError('No observed price dates in the requested purchase or sale month')
     if sale_date < purchase_date:
         raise ValueError('Sale date cannot precede purchase date')
-    if not set(symbols).issubset(close_1.columns):
+    if not set(symbols).issubset(date_sorted_closes.columns):
         raise ValueError('Selected companies are missing from price data')
-    purchase_prices = _check_purchase_prices(close_1.loc[purchase_date, symbols])
-    sale_prices = pd.to_numeric(close_1.loc[sale_date, symbols], errors='coerce')
+    purchase_prices = _check_purchase_prices(date_sorted_closes.loc[purchase_date, symbols])
+    sale_prices = pd.to_numeric(date_sorted_closes.loc[sale_date, symbols], errors='coerce')
     if not np.isfinite(sale_prices).all() or (sale_prices < 0).any():
         raise ValueError('Endpoint prices must be finite; purchase > 0 and sale >= 0')
     return pd.DataFrame({
@@ -236,16 +236,16 @@ def Purchase_share(Purchase, Rank, investment):
 
 
 
-def process_year_data(year, data, previous_total_value, purchase_year_imsi, purchase_month_imsi, sale_year_imsi, sale_month_imsi, close_1, base_year=None):
+def process_year_data(year, data, previous_total_value, base_purchase_year, base_purchase_month, base_sale_year, base_sale_month, adjusted_closes, base_year=None):
     if not np.isfinite(previous_total_value) or previous_total_value < 0:
         raise ValueError('Portfolio value must be finite and nonnegative')
     if data.empty or previous_total_value == 0:
         return previous_total_value, pd.DataFrame(columns=['기업명', '매수일', '매도가', '매수가', '매도일', '구매주식수', '투자원금', '잔금', '매출', '수익', '수익률', '수익률_양음'])
     # Explicit period anchor replaces the undeclared global start_year.
-    anchor = purchase_year_imsi if base_year is None else base_year
-    Purchase_current = Price_for_Purchase_Sale(purchase_year_imsi + (year - anchor), purchase_month_imsi,
-                                               sale_year_imsi + (year - anchor), sale_month_imsi,
-                                               data, close_1)
+    anchor = base_purchase_year if base_year is None else base_year
+    Purchase_current = Price_for_Purchase_Sale(base_purchase_year + (year - anchor), base_purchase_month,
+                                               base_sale_year + (year - anchor), base_sale_month,
+                                               data, adjusted_closes)
 
     share_current = Purchase_share(Purchase_current, data, previous_total_value)
 
@@ -264,7 +264,7 @@ def process_year_data(year, data, previous_total_value, purchase_year_imsi, purc
 def save_to_excel(data, filename):
     data.to_excel(filename, index=False)
     print(f"Data saved to {filename}")
-def process_financial_indicator(year_range, data_set, initial_investment, purchase_params, sale_params, close_data):
+def process_financial_indicator(year_range, data_set, initial_investment, purchase_params, sale_params, adjusted_closes):
     year_range = list(year_range)
     if year_range != sorted(set(year_range)):
         raise ValueError('Year range must be strictly increasing and unique')
@@ -273,7 +273,7 @@ def process_financial_indicator(year_range, data_set, initial_investment, purcha
     previous_total_value = initial_investment
     for year in year_range:
         current_data = data_set[data_set['Year'] == year]
-        total_value_current, profit_df = process_year_data(year, current_data, previous_total_value, *purchase_params, *sale_params, close_data, base_year=year_range[0])
+        total_value_current, profit_df = process_year_data(year, current_data, previous_total_value, *purchase_params, *sale_params, adjusted_closes, base_year=year_range[0])
         
         total_values[year] = total_value_current
         profits[year] = profit_df
