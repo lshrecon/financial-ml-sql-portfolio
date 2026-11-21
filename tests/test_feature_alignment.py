@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import pandas as pd
-import KSE_가치팩터_functions as functions
+import value_factor_backtest as functions
 
 
 class FeatureAlignment(unittest.TestCase):

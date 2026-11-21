@@ -7,7 +7,7 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-target = Path(os.environ.get("ML_HELPER_PATH", ROOT / "KSE_가치팩터_functions.py"))
+target = Path(os.environ.get("ML_HELPER_PATH", ROOT / "value_factor_backtest.py"))
 spec = importlib.util.spec_from_file_location("accounting_under_test", target)
 kf = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(kf)

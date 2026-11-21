@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-kf = importlib.import_module('KSE_가치팩터_functions')
+kf = importlib.import_module('value_factor_backtest')
 
 
 class BoundaryCases(unittest.TestCase):
