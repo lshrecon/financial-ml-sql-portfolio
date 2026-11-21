@@ -6,11 +6,36 @@ from evaluate_saved_cohort import prepare_cohort, select_winner
 
 class SavedCohortTests(unittest.TestCase):
     def setUp(self):
-        self.raw = pd.DataFrame([
-            {'연도': 2002, '기업명': 'unknown', '매수가': 100, '매도가': np.nan, '구매주식수': 9, '투자원금': 1000, '매수일': '2002-04-01', '매도일': '2003-03-31', 'feature': 1},
-            {'연도': 2002, '기업명': 'flat', '매수가': 100, '매도가': 100, '구매주식수': 9, '투자원금': 1000, '매수일': '2002-04-01', '매도일': '2003-03-31', 'feature': 2}
-        ])
-        self.protocol = {'expected_missing': [[2002, 'unknown']], 'features': ['feature']}
+        self.raw = pd.DataFrame(
+            [
+                {
+                    '연도': 2002,
+                    '기업명': 'unknown',
+                    '매수가': 100,
+                    '매도가': np.nan,
+                    '구매주식수': 9,
+                    '투자원금': 1000,
+                    '매수일': '2002-04-01',
+                    '매도일': '2003-03-31',
+                    'feature': 1,
+                },
+                {
+                    '연도': 2002,
+                    '기업명': 'flat',
+                    '매수가': 100,
+                    '매도가': 100,
+                    '구매주식수': 9,
+                    '투자원금': 1000,
+                    '매수일': '2002-04-01',
+                    '매도일': '2003-03-31',
+                    'feature': 2,
+                },
+            ]
+        )
+        self.protocol = {
+            'expected_missing': [[2002, 'unknown']],
+            'features': ['feature'],
+        }
 
     def test_unknown_is_quarantined_flat_is_retained_as_nonpositive(self):
         result, rejected = prepare_cohort(self.raw, self.protocol)
@@ -39,8 +64,13 @@ class SavedCohortTests(unittest.TestCase):
                     prepare_cohort(self.raw, self.protocol)
 
     def test_predeclared_selection_metric_not_accuracy(self):
-        values = {'baseline': {'f1': .60, 'accuracy': .44}, 'tree': {'f1': .53, 'accuracy': .57}}
-        self.assertEqual(select_winner(values, ['baseline', 'tree']), 'baseline')
+        values = {
+            'baseline': {'f1': 0.60, 'accuracy': 0.44},
+            'tree': {'f1': 0.53, 'accuracy': 0.57},
+        }
+        self.assertEqual(
+            select_winner(values, ['baseline', 'tree']), 'baseline'
+        )
 
 
 if __name__ == '__main__':
