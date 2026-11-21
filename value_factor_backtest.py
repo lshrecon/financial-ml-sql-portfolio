@@ -241,8 +241,7 @@ def price_for_purchase_sale(purchase_year, purchase_month, sale_year,
     sale_prices = pd.to_numeric(date_sorted_closes.loc[sale_date, symbols],
                                 errors='coerce')
     if not np.isfinite(sale_prices).all() or (sale_prices < 0).any():
-        raise ValueError('Endpoint prices must be finite; '
-                         'purchase > 0 and sale >= 0')
+        raise ValueError('Sale prices must be finite and nonnegative')
     return pd.DataFrame({
         '기업명': symbols,
         '매수일': purchase_date,
@@ -300,7 +299,6 @@ def process_year_data(year, ranked_companies_for_year, previous_total_value,
         return previous_total_value, pd.DataFrame(columns=[
             '기업명', '매수일', '매도가', '매수가', '매도일', '구매주식수',
             '투자원금', '잔금', '매출', '수익', '수익률', '수익률_양음'])
-    # Explicit period anchor replaces the undeclared global start_year.
     anchor = base_purchase_year if base_year is None else base_year
     purchase_current = price_for_purchase_sale(
         base_purchase_year + (year - anchor), base_purchase_month,
