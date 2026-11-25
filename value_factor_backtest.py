@@ -96,6 +96,14 @@ def calculate_q1_average_for_all_companies(df, year, company_columns):
     return calculate_q1_endpoint_mean(df, year, company_columns)
 
 
+def extract_per_share_values(df_fin, column):
+    return (
+        df_fin[['Name', '회계년', column]]
+        .sort_values(by=['회계년'])
+        .rename(columns={'회계년': 'Year'})
+    )
+
+
 def calculate_price_ratios(
     per_share_values, column, average_prices, company_columns
 ):
@@ -189,6 +197,20 @@ def top_companies_by_inverse_rank(df, year, top_n):
 
 
 top_companies_by_inverse_Rank = top_companies_by_inverse_rank
+
+
+def calculate_price_ratio_rank(inverse_ratios, company_columns):
+    ranked_companies_by_year = pd.DataFrame()
+    for year in range(2001, 2024):
+        top_companies = top_companies_by_inverse_rank(
+            inverse_ratios, year, len(company_columns)
+        )
+        top_companies['Year'] = year
+        top_companies['Rank'] = range(1, len(top_companies) + 1)
+        ranked_companies_by_year = pd.concat(
+            [ranked_companies_by_year, top_companies], ignore_index=True
+        )
+    return ranked_companies_by_year
 
 
 def calculate_weighted_average(dfs):
@@ -451,6 +473,16 @@ def process_year_data(
     total_value_current = purchase_current_share['매출'].sum()
 
     return total_value_current, purchase_current_share
+
+
+def merge_values(df_profit, df_inverse, column):
+    df_merged = df_profit.copy()
+    for index, row in df_profit.iterrows():
+        year = row['연도']
+        company = row['기업명']
+        value = df_inverse.loc[df_inverse['Year'] == year, company].iloc[0]
+        df_merged.at[index, column] = value
+    return df_merged
 
 
 def save_to_excel(data, filename):
