@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from ml_validation import recalculate_returns
+from ml_validation import add_price_direction_targets, recalculate_returns
 
 
 class AdjustedClosesByCompany:
@@ -473,6 +473,38 @@ def process_year_data(
     total_value_current = purchase_current_share['매출'].sum()
 
     return total_value_current, purchase_current_share
+
+
+def calculate_combined_profit(
+    ranked_companies_by_year,
+    start_year,
+    end_year,
+    base_purchase_year,
+    base_purchase_month,
+    base_sale_year,
+    base_sale_month,
+    adjusted_closes,
+):
+    profits = []
+    for year in range(start_year, end_year + 1):
+        ranked_companies_for_year = ranked_companies_by_year[
+            ranked_companies_by_year['Year'] == year
+        ]
+        _, profit = process_year_data(
+            year,
+            ranked_companies_for_year,
+            5000000 * len(ranked_companies_for_year),
+            base_purchase_year,
+            base_purchase_month,
+            base_sale_year,
+            base_sale_month,
+            adjusted_closes,
+            base_year=start_year,
+        )
+        profit = add_price_direction_targets(profit)
+        profit['연도'] = year
+        profits.append(profit)
+    return pd.concat(profits)
 
 
 def merge_values(df_profit, df_inverse, column):
