@@ -1,5 +1,6 @@
 """Offline regressions only: these tests do not run or emulate MySQL."""
 
+import sqlite3
 import tempfile
 from pathlib import Path
 import unittest
@@ -9,6 +10,7 @@ import pandas as pd
 from stock_etl import (
     COLUMNS,
     DataValidationError,
+    build_adjusted_closes,
     prepare_stock_prices,
     validate_stock_csv,
     validate_stock_rows,
@@ -278,6 +280,34 @@ class StockEtlTests(unittest.TestCase):
             with self.subTest(wide=wide):
                 with self.assertRaises(DataValidationError):
                     prepare_stock_prices(wide)
+
+    def test_build_adjusted_closes_keeps_company_order_and_gaps(self):
+        connection = sqlite3.connect(':memory:')
+        connection.execute(
+            'CREATE TABLE stock_data_eav (id INTEGER PRIMARY KEY, '
+            'entity TEXT, attribute TEXT, value REAL)'
+        )
+        connection.executemany(
+            'INSERT INTO stock_data_eav (entity, attribute, value) '
+            'VALUES (?, ?, ?)',
+            [
+                ('2021-01-04', '삼성전자', 83000.0),
+                ('2021-01-05', '삼성전자', 83900.0),
+                ('2021-01-04', 'LG', 120000.0),
+            ],
+        )
+        closes = build_adjusted_closes(connection)
+        connection.close()
+        self.assertEqual(
+            list(closes.columns), ['Symbol Name', '삼성전자', 'LG']
+        )
+        self.assertEqual(
+            list(closes['Symbol Name']),
+            [pd.Timestamp('2021-01-04'), pd.Timestamp('2021-01-05')],
+        )
+        self.assertEqual(closes['삼성전자'].tolist(), [83000.0, 83900.0])
+        self.assertEqual(closes.loc[0, 'LG'], 120000.0)
+        self.assertTrue(pd.isna(closes.loc[1, 'LG']))
 
 
 if __name__ == '__main__':

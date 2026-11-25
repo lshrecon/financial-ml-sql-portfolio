@@ -1,7 +1,7 @@
 """Validate stock-price rows before exporting the MySQL LOAD DATA input.
 
-This module never connects to a database. CSV output uses UTF-8 without BOM,
-LF line endings, and doubled quote escaping, matching the accompanying SQL.
+CSV output uses UTF-8 without BOM, LF line endings, and doubled quote
+escaping, matching the accompanying SQL.
 """
 
 from __future__ import annotations
@@ -255,6 +255,20 @@ def validate_stock_csv(path: str | Path) -> pd.DataFrame:
             'LF, quoted fields)'
         )
     return clean
+
+
+def build_adjusted_closes(connection: object) -> pd.DataFrame:
+    rows = pd.read_sql(
+        'SELECT entity, attribute, value FROM stock_data_eav ORDER BY id',
+        connection,
+    )
+    companies = list(pd.unique(rows['attribute']))
+    closes = rows.pivot(index='entity', columns='attribute', values='value')
+    closes = closes.reindex(columns=companies)
+    closes.index = pd.to_datetime(closes.index)
+    closes.index.name = 'Symbol Name'
+    closes.columns.name = None
+    return closes.reset_index()
 
 
 if __name__ == '__main__':
