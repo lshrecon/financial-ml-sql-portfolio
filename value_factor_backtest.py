@@ -517,6 +517,18 @@ def merge_values(df_profit, df_inverse, column):
     return df_merged
 
 
+def calculate_portfolio_profits(excel_backtesting_file):
+    profits = []
+    for sheet in (0, 1):
+        portfolio = add_price_direction_targets(
+            recalculate_returns(
+                pd.read_excel(excel_backtesting_file, sheet_name=sheet)
+            )
+        )
+        profits.append(portfolio['수익'].sum())
+    return tuple(profits)
+
+
 def save_to_excel(data, filename):
     data.to_excel(filename, index=False)
     print(f'Data saved to {filename}')
