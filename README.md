@@ -9,6 +9,7 @@
 - 現在の分類対象は、調整後株価の上昇・非上昇です。口座損益と残金は別に計算します。
 - `ml_validation.py`：残金・利益・価格方向、時間順分割の共通処理。
 - `value_factor_backtest.py`：指標、順位、価格取得、集計（2026年11月にリファクタリング）。
+- `decision_tree.py`：価格方向の決定木の作成と比較（2026年11月にノートブックから移動）。
 - `evaluate_price_direction.py`：v2の限定的な価格方向の評価。`evaluate_saved_cohort.py` は以前の口座利益目標の評価・回帰検査用です。
 - 3冊のMLノートブック：前処理と元の実験構成を読むための参考ソース。
 - `database/stock_etl.py` とSQL：pandasでの整形、MySQLのテーブル設計・取込・年別抽出。MLはExcel入力で、DBからモデルへの自動連携は行っていません。
@@ -19,14 +20,14 @@
 
 | 項目 | 前 | 後 |
 |---|---|---|
-| ファイル | `KSE_가치팩터_functions.py` 273行 | `value_factor_backtest.py` 555行（ノートブックから移した関数6つを含む） |
+| ファイル | `KSE_가치팩터_functions.py` 273行 | `value_factor_backtest.py` 567行（ノートブックから移した関数7つを含む） |
 | 79文字を超える行 | 51 | 0 |
 | コメント | 10行（不要なコメント5行を含む） | 6行（理由を説明するコメント3つ） |
 | 大文字を含む関数・引数名 | 6 | 0（旧関数名3つは別名として残す） |
 | 重複コード | 日付表の作成、月の最初・最後の取引日の選択、購入価格の検査がそれぞれ2か所 | クラス1つと関数1つにまとめた |
 | 同じ表の呼び名 | 価格表3つ、選定企業の表4つ | それぞれ1つ |
 | ノートブック `머신러닝_전처리.ipynb` | コード946行。指標の結合5つ、売買ループ10個、財務列の抽出4つ、指標計算4つ、順位表5つ、逆数4つが重複し、指標ごとに同じ処理の流れが4回コピーされていた。コメント201行。保存したExcelをすぐ読み直す箇所5つ | コード138行。4つの指標を関数 `build_indicator_tables` 1つとループで処理。その中で使う関数6つ（`extract_per_share_values`、`calculate_price_ratios`、`calculate_inverse_price_ratios`、`calculate_price_ratio_rank`、`calculate_combined_profit`、`merge_values`）はモジュールに置いた。案内コメント2行。メモリ上の表をそのまま使う |
-| ノートブック `의사결정트리.ipynb` | コード303行。PER・PBR・ALLごとにExcel読込・データ分割・学習・予測・図・上位20社の選択が重複し、バックテストの合計とモデル比較のセルも2つずつあった。コメント72行 | コード169行。クラス1つ（`PriceDirectionTree`）と関数2つ（`calculate_portfolio_profits`、`compare_trees`）にまとめた。コメント0行 |
+| ノートブック `의사결정트리.ipynb` | コード303行。PER・PBR・ALLごとにExcel読込・データ分割・学習・予測・図・上位20社の選択が重複し、バックテストの合計とモデル比較のセルも2つずつあった。コメント72行 | コード71行。クラス1つ（`PriceDirectionTree`）と関数2つ（`calculate_portfolio_profits`、`compare_trees`）にまとめ、モジュール（`decision_tree.py`、`value_factor_backtest.py`）に移した。コメント0行 |
 | ノートブック `랜덤포레스트.ipynb` | コード193行。コメント40行 | コード229行。理由と解釈上の注意を書いたコメント9行だけを残した |
 | 結果を使わない元Excelの読込 | MLノートブック2か所 | 0 |
 | モジュール6つ（`ml_validation.py` など） | 79文字を超える行244行 | 0 |

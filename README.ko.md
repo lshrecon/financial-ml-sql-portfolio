@@ -11,6 +11,7 @@
 - 현재 분류 대상은 수정주가의 상승·비상승입니다. 계정 손익과 잔금은 별도로 계산합니다.
 - `ml_validation.py`: 잔금·이익·가격 방향, 시간순 분할의 공통 처리.
 - `value_factor_backtest.py`: 지표, 순위, 가격 가져오기, 집계(2026년 11월 리팩토링).
+- `decision_tree.py`: 가격 방향 결정 트리의 생성과 비교(2026년 11월에 노트북에서 옮김).
 - `evaluate_price_direction.py`: v2의 제한적인 가격 방향 평가. `evaluate_saved_cohort.py`는 이전 계정 이익 목표의 평가·회귀검사용입니다.
 - ML 노트북 3개: 전처리와 원래 실험 구성을 읽기 위한 참고 소스.
 - `database/stock_etl.py`와 SQL: pandas로 데이터 형태 정리, MySQL 테이블 설계·적재·연도별 추출. ML은 Excel을 입력으로 사용하며, DB에서 모델로 자동 연결하지 않습니다.
@@ -21,14 +22,14 @@
 
 | 항목 | 전 | 후 |
 |---|---|---|
-| 파일 | `KSE_가치팩터_functions.py` 273줄 | `value_factor_backtest.py` 555줄(노트북에서 옮긴 함수 6개 포함) |
+| 파일 | `KSE_가치팩터_functions.py` 273줄 | `value_factor_backtest.py` 567줄(노트북에서 옮긴 함수 7개 포함) |
 | 79자 넘는 줄 | 51 | 0 |
 | 주석 | 10줄(필요 없는 주석 5줄 포함) | 6줄(이유를 설명하는 주석 3개) |
 | 대문자가 들어간 함수·매개변수 이름 | 6 | 0(옛 함수 이름 3개는 별칭으로 남김) |
 | 반복된 코드 | 날짜표 만들기, 월 첫·마지막 거래일 고르기, 매수가 검사가 각각 2곳 | 클래스 1개와 함수 1개로 모음 |
 | 같은 표를 부르는 이름 | 가격표 3개, 선택된 회사 표 4개 | 각각 1개 |
 | 노트북 `머신러닝_전처리.ipynb` | 코드 946줄. 지표 붙이기 5개, 매매 반복문 10개, 재무 열 뽑기 4개, 지표 계산 4개, 순위표 5개, 역수 4개가 반복되고, 지표마다 같은 처리 순서가 4번 복사됨. 주석 201줄. 저장한 엑셀을 바로 다시 읽는 곳 5개 | 코드 138줄. 지표 4개를 함수 `build_indicator_tables` 하나와 반복문으로 처리. 그 안에서 쓰는 함수 6개(`extract_per_share_values`, `calculate_price_ratios`, `calculate_inverse_price_ratios`, `calculate_price_ratio_rank`, `calculate_combined_profit`, `merge_values`)는 모듈에 둠. 안내 주석 2줄. 메모리의 표를 바로 씀 |
-| 노트북 `의사결정트리.ipynb` | 코드 303줄. PER·PBR·ALL마다 엑셀 읽기·데이터 나누기·학습·예측·그림·상위 20개 고르기가 반복되고, 백테스팅 합계와 모델 비교 셀도 2번씩 있음. 주석 72줄 | 코드 169줄. 클래스 1개(`PriceDirectionTree`)와 함수 2개(`calculate_portfolio_profits`, `compare_trees`)로 모음. 주석 0줄 |
+| 노트북 `의사결정트리.ipynb` | 코드 303줄. PER·PBR·ALL마다 엑셀 읽기·데이터 나누기·학습·예측·그림·상위 20개 고르기가 반복되고, 백테스팅 합계와 모델 비교 셀도 2번씩 있음. 주석 72줄 | 코드 71줄. 클래스 1개(`PriceDirectionTree`)와 함수 2개(`calculate_portfolio_profits`, `compare_trees`)로 모아 모듈(`decision_tree.py`, `value_factor_backtest.py`)로 옮김. 주석 0줄 |
 | 노트북 `랜덤포레스트.ipynb` | 코드 193줄. 주석 40줄 | 코드 229줄. 이유와 해석 주의를 적은 주석 9줄만 남김 |
 | 결과를 쓰지 않는 원본 엑셀 읽기 | ML 노트북 2곳 | 0 |
 | 모듈 6개(`ml_validation.py` 등) | 79자 넘는 줄 244개 | 0 |
