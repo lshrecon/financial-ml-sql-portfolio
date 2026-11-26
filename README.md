@@ -38,7 +38,7 @@
 
 - 動作確認：テスト40件とdatabaseのテスト18件が通過しました（Python 3.13.5、pandas 2.3.1）。テストの変更は、import行、ノートブックのセルを読んでいたPBRテスト1件の呼び出し方（期待値は同じ）、フォーマッターによる折り返し、databaseのテスト名1つです。ノートブックからモジュールに移した関数7つを作り物の表で確かめるテスト7件と、`build_adjusted_closes` をSQLiteのメモリDBで確かめるテスト1件を追加しました。フォーマッターを適用したコミットは、ファイルごとにコードの構造（AST）が同じことを確認しました。最初のコミットは元のコードと主な入力で、その後のコミットは直前のコミットとランダム入力で結果を比較しました。前処理ノートブックの関数整理は、作り物のデータで元のコードと比較しました。11月25日の構造変更は実際のExcelで直前のコミットと比較し、コメント整理はコードの構造（AST）が同じことを確認しました。決定木は最後まで実行して出力と保存する表2つが同じで、前処理は最後まで実行して保存する表6つの値が同じでした。ランダムフォレストはGridSearch・RandomizedSearchの前まで比較しました。元のノートブックも元データのままでは最後まで動かないため、比較のときだけ、売却価格が欠損するMLノートブックの3行と、前処理で購入日・売却日の価格がない3つの会社・年度を除きました。
 - 実行時間（実際のExcel、このPCで1回測定）：決定木64.8秒 → 17.3秒（結果を使わない元データの読込41.7秒を削除）、前処理93.4秒 → 68.1秒（元データの読込を除く、中間Excelの保存・読み直し26.6秒を削除）。
-- MySQL経路の確認：このPCのMySQL 8.4.13にリポジトリのSQLで3,784,245行を取り込んで比較しました。DBから読んだ価格表はExcelのシートと順序・欠損・値が同じで（型はすべてfloat64）、MySQLモードの前処理ノートブックは出力と保存する表6つがExcelモードと型まで同じでした。価格表の読込はExcelで41.7～52.5秒、MySQLで29.7秒でした。
+- MySQL経路の確認：このPCのMySQL 8.4.13にリポジトリのSQLで3,784,245行を取り込んで比較しました。DBから読んだ価格表はExcelのシートと順序・欠損・値が同じで（型はすべてfloat64）、MySQLモードの前処理ノートブックは出力と保存する表6つがExcelモードと型まで同じでした。価格表の読込はExcelで41.7～52.5秒、MySQLで29.7秒でした。ノートブックは `stock_data` に `SELECT` 権限だけを持つアカウントでも同じ表を読みました（25.7秒）。
 - 意図した動作の変更：日付列を位置ではなく名前（'Symbol Name' または 'Date'）で探します。13月・0月のような誤った月は別の年に繰り越さず、エラーにします。購入価格と売却価格のエラーメッセージを分けました。前処理は中間Excel（`*_profit_for_tree.xlsx`）を作らなくなりました。メモリ上の表の7列は型が変わります（例：5000000 → 5000000.0）。保存する `*_profit_final.xlsx` を読み直した表は同じです。前処理は4つの指標をループで処理するため、指標ごとの中間表と指標ごとの `combined_profit` の出力は表示しなくなりました。
 - 元のコード：[c0df58a の `KSE_가치팩터_functions.py`](https://github.com/lshrecon/financial-ml-sql-portfolio/blob/c0df58a/KSE_%EA%B0%80%EC%B9%98%ED%8C%A9%ED%84%B0_functions.py)。変更全体：[c0df58a...main の比較](https://github.com/lshrecon/financial-ml-sql-portfolio/compare/c0df58a...main)。
 
@@ -67,7 +67,7 @@
 
 ## 小さな検査の入口
 
-確認済みのML環境はPython 3.12.7、NumPy 1.26.4、pandas 2.2.2、scikit-learn 1.7.0です。検査にはmatplotlib、Excel読込にはopenpyxl、MySQLからの読込にはSQLAlchemyとPyMySQLも必要です（確認：SQLAlchemy 2.0.34、PyMySQL 1.2.4、MySQL 8.4.13）。書式検査（`ruff format --check .`）にはruff 0.17.6が必要です。新規環境のインストールは検証していません。
+確認済みのML環境はPython 3.12.7、NumPy 1.26.4、pandas 2.2.2、scikit-learn 1.7.0です。検査にはmatplotlib、Excel読込にはopenpyxl、MySQLからの読込にはSQLAlchemyとPyMySQLも必要です（確認：SQLAlchemy 2.0.34、PyMySQL 1.2.4、MySQL 8.4.13）。接続情報は `MYSQL_HOST`・`MYSQL_USER`・`MYSQL_PASSWORD`・`MYSQL_DATABASE` の環境変数で渡し、パスワードはコードやファイルに書きません。書式検査（`ruff format --check .`）にはruff 0.17.6が必要です。新規環境のインストールは検証していません。
 
 ```text
 python -m unittest discover -s tests -v
