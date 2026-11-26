@@ -257,11 +257,16 @@ def validate_stock_csv(path: str | Path) -> pd.DataFrame:
     return clean
 
 
-def build_adjusted_closes(connection: object) -> pd.DataFrame:
-    rows = pd.read_sql(
-        'SELECT entity, attribute, value FROM stock_data_eav ORDER BY id',
-        connection,
-    )
+def build_adjusted_closes(
+    connection: object, months: tuple[int, ...] | None = None
+) -> pd.DataFrame:
+    query = 'SELECT entity, attribute, value FROM stock_data_eav'
+    if months is not None:
+        wanted = ', '.join(
+            f"'{int(month):02d}'" for month in sorted(set(months))
+        )
+        query += f' WHERE SUBSTR(entity, 6, 2) IN ({wanted})'
+    rows = pd.read_sql(query + ' ORDER BY id', connection)
     companies = list(pd.unique(rows['attribute']))
     closes = rows.pivot(index='entity', columns='attribute', values='value')
     closes = closes.reindex(columns=companies)

@@ -309,6 +309,31 @@ class StockEtlTests(unittest.TestCase):
         self.assertEqual(closes.loc[0, 'LG'], 120000.0)
         self.assertTrue(pd.isna(closes.loc[1, 'LG']))
 
+    def test_build_adjusted_closes_reads_only_given_months(self):
+        connection = sqlite3.connect(':memory:')
+        connection.execute(
+            'CREATE TABLE stock_data_eav (id INTEGER PRIMARY KEY, '
+            'entity TEXT, attribute TEXT, value REAL)'
+        )
+        connection.executemany(
+            'INSERT INTO stock_data_eav (entity, attribute, value) '
+            'VALUES (?, ?, ?)',
+            [
+                ('2021-01-04', '삼성전자', 83000.0),
+                ('2021-02-01', '삼성전자', 82000.0),
+                ('2021-02-01', 'LG', 120000.0),
+                ('2021-04-01', '삼성전자', 86000.0),
+            ],
+        )
+        closes = build_adjusted_closes(connection, months=(1, 4))
+        connection.close()
+        self.assertEqual(list(closes.columns), ['Symbol Name', '삼성전자'])
+        self.assertEqual(
+            list(closes['Symbol Name']),
+            [pd.Timestamp('2021-01-04'), pd.Timestamp('2021-04-01')],
+        )
+        self.assertEqual(closes['삼성전자'].tolist(), [83000.0, 86000.0])
+
 
 if __name__ == '__main__':
     unittest.main()
