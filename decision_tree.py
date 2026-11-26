@@ -50,7 +50,7 @@ class PriceDirectionTree:
         rising = test_data[test_data['예측_가격상승여부'] == 1]
         if year is None:
             return (
-                rising.groupby('연도')
+                rising.groupby('연도')[list(rising.columns)]
                 .apply(lambda x: x.nlargest(20, column))
                 .reset_index(drop=True)
             )
