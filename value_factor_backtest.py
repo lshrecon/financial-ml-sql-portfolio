@@ -12,6 +12,11 @@ class AdjustedClosesByCompany:
     DATE_COLUMNS = ('Symbol Name', 'Date')
 
     def __init__(self, adjusted_closes):
+        """Keep a copy indexed by date and sorted by date.
+
+        The date column is 'Symbol Name' or 'Date'. A missing column or an
+        invalid or repeated date raises ValueError.
+        """
         date_indexed_closes = adjusted_closes.copy()
         if not isinstance(date_indexed_closes.index, pd.DatetimeIndex):
             date_column = next(
@@ -36,6 +41,7 @@ class AdjustedClosesByCompany:
         self._date_sorted_closes = date_indexed_closes.sort_index()
 
     def search_first_date(self, year, month):
+        """Return the month's first observed date, or None if it has none."""
         return next(
             (
                 date
@@ -46,6 +52,7 @@ class AdjustedClosesByCompany:
         )
 
     def search_last_date(self, year, month):
+        """Return the month's last observed date, or None if it has none."""
         return next(
             (
                 date
@@ -97,6 +104,7 @@ def calculate_q1_average_for_all_companies(df, year, company_columns):
 
 
 def extract_per_share_values(df_fin, column):
+    """Return the company, year and given per-share value columns of df_fin."""
     return (
         df_fin[['Name', '회계년', column]]
         .sort_values(by=['회계년'])
@@ -107,6 +115,11 @@ def extract_per_share_values(df_fin, column):
 def calculate_price_ratios(
     per_share_values, column, average_prices, company_columns
 ):
+    """Calculate one price ratio, such as PER, for each year and company.
+
+    Each year's Q1 endpoint mean price is divided by the previous
+    year's per-share value: EPS gives PER, BPS PBR, SPS PSR, CFPS PCR.
+    """
     values_by_year = per_share_values.pivot(
         index='Year', columns='Name', values=column
     )
@@ -139,6 +152,7 @@ def calculate_price_ratios(
 
 
 def calculate_inverse_price_ratios(price_ratios, company_columns):
+    """Return a copy of the price ratios with company values as reciprocals."""
     inverse_ratios = price_ratios.copy()
     for company in company_columns:
         inverse_ratios[company] = 1 / inverse_ratios[company]
@@ -200,6 +214,7 @@ top_companies_by_inverse_Rank = top_companies_by_inverse_rank
 
 
 def calculate_price_ratio_rank(inverse_ratios, company_columns):
+    """Rank companies each year, giving 1 to the largest inverse ratio."""
     ranked_companies_by_year = pd.DataFrame()
     for year in range(2001, 2024):
         top_companies = top_companies_by_inverse_rank(
@@ -308,6 +323,7 @@ def calculate_mdd_with_year(values):
 
 
 def plot_total_values(values, title):
+    """Plot the total value for each year as a line chart."""
     frame = _annual_observations(values)
     plt.figure(figsize=(10, 6))
     plt.plot(frame['Year'], frame['Total Value'], marker='o')
@@ -428,6 +444,12 @@ def process_year_data(
     adjusted_closes,
     base_year=None,
 ):
+    """Split the money equally, buy one year's companies and sell them.
+
+    The base purchase and sale dates move by year - base_year (default:
+    base_purchase_year). Return the total value after the sale and a
+    table per company.
+    """
     if not np.isfinite(previous_total_value) or previous_total_value < 0:
         raise ValueError('Portfolio value must be finite and nonnegative')
     if ranked_companies_for_year.empty or previous_total_value == 0:
@@ -485,6 +507,12 @@ def calculate_combined_profit(
     base_sale_month,
     adjusted_closes,
 ):
+    """Trade every ranked company with 5,000,000 each, year by year.
+
+    Years are independent, not compounded, and the base dates are those
+    of start_year. Return one table of all years, with price-direction
+    targets and the year added.
+    """
     profits = []
     for year in range(start_year, end_year + 1):
         ranked_companies_for_year = ranked_companies_by_year[
@@ -508,6 +536,11 @@ def calculate_combined_profit(
 
 
 def merge_values(df_profit, df_inverse, column):
+    """Copy df_profit and fill column from df_inverse by year and company.
+
+    df_profit needs a unique index: .at puts values for repeated labels in
+    the wrong rows.
+    """
     df_merged = df_profit.copy()
     for index, row in df_profit.iterrows():
         year = row['연도']
@@ -518,6 +551,10 @@ def merge_values(df_profit, df_inverse, column):
 
 
 def calculate_portfolio_profits(excel_backtesting_file):
+    """Return the total profit of the first two sheets of the workbook.
+
+    Profits are recalculated from prices and shares, not read.
+    """
     profits = []
     for sheet in (0, 1):
         portfolio = add_price_direction_targets(
@@ -530,6 +567,7 @@ def calculate_portfolio_profits(excel_backtesting_file):
 
 
 def save_to_excel(data, filename):
+    """Save the table to Excel without the index and print the file name."""
     data.to_excel(filename, index=False)
     print(f'Data saved to {filename}')
 
@@ -542,6 +580,12 @@ def process_financial_indicator(
     sale_params,
     adjusted_closes,
 ):
+    """Reinvest the whole total value every year and record each year.
+
+    Start with initial_investment. purchase_params and sale_params are the
+    first year's (year, month). Return the total value and the company
+    table, keyed by year.
+    """
     year_range = list(year_range)
     if year_range != sorted(set(year_range)):
         raise ValueError('Year range must be strictly increasing and unique')

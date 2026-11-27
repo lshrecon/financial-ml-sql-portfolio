@@ -260,6 +260,12 @@ def validate_stock_csv(path: str | Path) -> pd.DataFrame:
 def build_adjusted_closes(
     connection: object, months: tuple[int, ...] | None = None
 ) -> pd.DataFrame:
+    """Read the adjusted closes in stock_data_eav as a date-by-company table.
+
+    Companies keep their order of first appearance (by id). With months,
+    only those months are read, and a company with no price in them has
+    no column.
+    """
     query = 'SELECT entity, attribute, value FROM stock_data_eav'
     if months is not None:
         wanted = ', '.join(

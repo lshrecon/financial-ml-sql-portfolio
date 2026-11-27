@@ -13,7 +13,13 @@ from ml_validation import (
 
 
 class PriceDirectionTree:
+    """Decision tree for whether a price rises, with a split by year."""
+
     def __init__(self, excel_file_path, features):
+        """Read the workbook, add targets and split it by year.
+
+        Training is up to 2016, validation 2017-2020 and test from 2021.
+        """
         excel_data = add_price_direction_targets(
             recalculate_returns(pd.read_excel(excel_file_path))
         )
@@ -24,6 +30,7 @@ class PriceDirectionTree:
         self._model = None
 
     def train(self, max_depth=None):
+        """Fit a new tree on the training data (random_state=42)."""
         self._model = DecisionTreeClassifier(
             max_depth=max_depth, random_state=42
         )
@@ -32,9 +39,11 @@ class PriceDirectionTree:
         )
 
     def predict(self, data):
+        """Return the predicted price direction (1 = rising) for each row."""
         return self._model.predict(data[self.features])
 
     def plot(self):
+        """Draw the trained tree."""
         plt.figure(figsize=(20, 10))
         plot_tree(
             self._model,
@@ -45,6 +54,10 @@ class PriceDirectionTree:
         plt.show()
 
     def top_rising_companies(self, column, year=None):
+        """Return the top 20 test rows by column among predicted rises.
+
+        Without year, take the top 20 of each year.
+        """
         test_data = self.test_data.copy()
         test_data['예측_가격상승여부'] = self.predict(test_data)
         rising = test_data[test_data['예측_가격상승여부'] == 1]
@@ -62,6 +75,7 @@ class PriceDirectionTree:
 
 
 def compare_trees(original_tree, simplified_tree):
+    """Print both trees' accuracy and confusion matrix on validation data."""
     y_validation = original_tree.validation_data['가격상승여부']
     original_predictions_validation = original_tree.predict(
         original_tree.validation_data
