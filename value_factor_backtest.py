@@ -216,7 +216,7 @@ top_companies_by_inverse_Rank = top_companies_by_inverse_rank
 def calculate_price_ratio_rank(inverse_ratios, company_columns):
     """Rank companies each year, giving 1 to the largest inverse ratio."""
     ranked_companies_by_year = pd.DataFrame()
-    for year in range(2001, 2024):
+    for year in sorted(inverse_ratios['Year']):
         top_companies = top_companies_by_inverse_rank(
             inverse_ratios, year, len(company_columns)
         )
@@ -506,12 +506,13 @@ def calculate_combined_profit(
     base_sale_year,
     base_sale_month,
     adjusted_closes,
+    investment_per_company=5000000,
 ):
-    """Trade every ranked company with 5,000,000 each, year by year.
+    """Trade every ranked company with equal money, year by year.
 
-    Years are independent, not compounded, and the base dates are those
-    of start_year. Return one table of all years, with price-direction
-    targets and the year added.
+    Each company gets investment_per_company. Years are independent, not
+    compounded, and the base dates are those of start_year. Return one
+    table of all years, with price-direction targets and the year added.
     """
     profits = []
     for year in range(start_year, end_year + 1):
@@ -521,7 +522,7 @@ def calculate_combined_profit(
         _, profit = process_year_data(
             year,
             ranked_companies_for_year,
-            5000000 * len(ranked_companies_for_year),
+            investment_per_company * len(ranked_companies_for_year),
             base_purchase_year,
             base_purchase_month,
             base_sale_year,
