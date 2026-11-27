@@ -123,7 +123,7 @@ def calculate_price_ratios(
     values_by_year = per_share_values.pivot(
         index='Year', columns='Name', values=column
     )
-    ratios = pd.DataFrame()
+    rows = []
     for year in range(
         per_share_values['Year'].min() + 1, average_prices['Year'].max() + 1
     ):
@@ -144,9 +144,8 @@ def calculate_price_ratios(
                 else:
                     ratio = None
                 row[company] = ratio
-            ratios = pd.concat(
-                [ratios, pd.DataFrame([row])], ignore_index=True
-            )
+            rows.append(row)
+    ratios = pd.DataFrame(rows)
     ratios['Year'] = ratios['Year'].astype(int)
     return ratios
 
